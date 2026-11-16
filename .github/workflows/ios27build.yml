@@ -7,8 +7,8 @@ on:
         description: Branch of hoshikv/xnu-kernel-peridot to build
         default: "ios27-arm64e-final"
       ios_sdk_version:
-        description: iOS SDK version to use (17.0 available, 27.0 not yet)
-        default: "17.0"
+        description: iOS SDK version to use (16.5 available, 27.0 not yet)
+        default: "16.5"
       kernel_config:
         description: RELEASE / DEVELOPMENT / DEBUG
         default: DEVELOPMENT
@@ -62,9 +62,9 @@ jobs:
           url=$(curl -s https://api.github.com/repos/theos/sdks/releases/latest \
             | jq -r '.assets[] | select(.name=="iPhoneOS${{ inputs.ios_sdk_version }}.sdk.tar.xz") | .browser_download_url')
           if [ -z "$url" ] || [ "$url" = "null" ]; then
-            echo "iOS ${{ inputs.ios_sdk_version }} SDK not found, falling back to iPhoneOS17.0.sdk.tar.xz"
+            echo "iOS ${{ inputs.ios_sdk_version }} SDK not found, falling back to iPhoneOS16.5.sdk.tar.xz"
             url=$(curl -s https://api.github.com/repos/theos/sdks/releases/latest \
-              | jq -r '.assets[] | select(.name=="iPhoneOS17.0.sdk.tar.xz") | .browser_download_url')
+              | jq -r '.assets[] | select(.name=="iPhoneOS16.5.sdk.tar.xz") | .browser_download_url')
           fi
           test -n "$url" && test "$url" != "null"
           echo "Downloading SDK from: $url"
