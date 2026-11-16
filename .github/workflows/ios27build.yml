@@ -74,7 +74,7 @@ jobs:
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           echo "IOS_SDK=iPhoneOS${{ inputs.ios_sdk_version }}.sdk" >> $GITHUB_ENV
 
-      - name: Build kernel
+      - name: Apply patches & setup
         env:
           THEOS: ${{ env.THEOS }}
           IOS_SDK: ${{ env.IOS_SDK }}
@@ -82,11 +82,13 @@ jobs:
           mkdir -p out
           ./xnu/apply.sh
           ./xnu-deps/setup.sh
-          ./tools/mk-ath11k.sh
-          # xnu-8796.121.2 path (HakiOS base)
-          mkdir -p xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/bsd/DEVELOPMENT
-          ./tools/mk-wlfw.sh
           touch out/.kernel-start
+
+      - name: Build kernel
+        env:
+          THEOS: ${{ env.THEOS }}
+          IOS_SDK: ${{ env.IOS_SDK }}
+        run: |
           BUILD_STATUS=0
           ./xnu-build.sh -j"$(nproc)" -k > out/kernel-build.log 2>&1 || BUILD_STATUS=$?
           K=xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot
@@ -104,6 +106,11 @@ jobs:
             echo "XNU's non-kernel symbolset audit failed after the kernel linked; using the verified new kernel"
           fi
           stat -c 'kernel: %s bytes' "$K"
+
+      - name: Build WiFi firmware (ath11k, wlfw)
+        run: |
+          ./tools/mk-ath11k.sh
+          ./tools/mk-wlfw.sh
 
       - name: Build hakios-metal
         run: |
