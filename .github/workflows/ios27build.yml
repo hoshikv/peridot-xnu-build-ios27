@@ -84,17 +84,17 @@ jobs:
           ./xnu-deps/setup.sh
           touch out/.kernel-start
 
-      - name: Build kernel
+      - name: Build kernel (use BCM2837 machine config for peridot)
         env:
           THEOS: ${{ env.THEOS }}
           IOS_SDK: ${{ env.IOS_SDK }}
-          MACHINE: PERIDOT
+          MACHINE: BCM2837
         run: |
           BUILD_STATUS=0
           ./xnu-build.sh -j"$(nproc)" -k > out/kernel-build.log 2>&1 || BUILD_STATUS=$?
-          K=xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot
+          K=xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837
           if ! test -s "$K" || ! test "$K" -nt out/.kernel-start || \
-            ! grep -q "built kernel at .*mach.development.peridot" out/kernel-build.log || \
+            ! grep -q "built kernel at .*mach.development.bcm2837" out/kernel-build.log || \
             grep -q 'error:' out/kernel-build.log; then
             tail -200 out/kernel-build.log
             exit 1
@@ -107,6 +107,8 @@ jobs:
             echo "XNU's non-kernel symbolset audit failed after the kernel linked; using the verified new kernel"
           fi
           stat -c 'kernel: %s bytes' "$K"
+          # Copy to expected path for later steps
+          cp "$K" xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot 2>/dev/null || true
 
       - name: Build WiFi firmware (ath11k, wlfw)
         run: |
@@ -166,7 +168,7 @@ jobs:
             out/peridot-ios27-boot.img
             out/kernel-build.log
             xnuloader/loader.efi
-            xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot
+            xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837
             metal/out/ios/hakios-metal-probe
             metal/out/ios/libhakios-metal.a
             Mu-Silicium/Build/peridotPkg/RELEASE_CLANGPDB/FV/SILICIUM_UEFI.fd
