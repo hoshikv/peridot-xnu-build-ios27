@@ -88,6 +88,7 @@ jobs:
         env:
           THEOS: ${{ env.THEOS }}
           IOS_SDK: ${{ env.IOS_SDK }}
+          MACHINE: PERIDOT
         run: |
           BUILD_STATUS=0
           ./xnu-build.sh -j"$(nproc)" -k > out/kernel-build.log 2>&1 || BUILD_STATUS=$?
