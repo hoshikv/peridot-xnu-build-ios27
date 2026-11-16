@@ -7,7 +7,7 @@ on:
         description: Branch of hoshikv/xnu-kernel-peridot to build
         default: "ios27-arm64e-final"
       ios_sdk_version:
-        description: iOS SDK version to use (16.5 available, 27.0 not yet)
+        description: iOS SDK version to use (16.5 available)
         default: "16.5"
       kernel_config:
         description: RELEASE / DEVELOPMENT / DEBUG
@@ -83,12 +83,13 @@ jobs:
           ./xnu/apply.sh
           ./xnu-deps/setup.sh
           ./tools/mk-ath11k.sh
-          mkdir -p xnu-src/xnu-10063.141.1/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/bsd/DEVELOPMENT
+          # xnu-8796.121.2 path (HakiOS base)
+          mkdir -p xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/bsd/DEVELOPMENT
           ./tools/mk-wlfw.sh
           touch out/.kernel-start
           BUILD_STATUS=0
           ./xnu-build.sh -j"$(nproc)" -k > out/kernel-build.log 2>&1 || BUILD_STATUS=$?
-          K=xnu-src/xnu-10063.141.1/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot
+          K=xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot
           if ! test -s "$K" || ! test "$K" -nt out/.kernel-start || \
             ! grep -q "built kernel at .*mach.development.peridot" out/kernel-build.log || \
             grep -q 'error:' out/kernel-build.log; then
@@ -157,7 +158,7 @@ jobs:
             out/peridot-ios27-boot.img
             out/kernel-build.log
             xnuloader/loader.efi
-            xnu-src/xnu-10063.141.1/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot
+            xnu-src/xnu-8796.121.2/BUILD/obj/DEVELOPMENT_ARM64E_PERIDOT/mach.development.peridot
             metal/out/ios/hakios-metal-probe
             metal/out/ios/libhakios-metal.a
             Mu-Silicium/Build/peridotPkg/RELEASE_CLANGPDB/FV/SILICIUM_UEFI.fd
